@@ -1,3 +1,36 @@
+%set up the PID parameters
+Kp = 0.8;
+Ki = 0.01;
+Kd = 0.0;
+dt = 0.01;
+error = 0.0;
+intergral_error = 0.0;
+last_error = 0.0;
+pre_velocity = zeros(1,3,'uint32');
+desired_angles = {[20, 3.0], [25, 3.0], [20, 3.0]};
+desired_angle_index = 0;
+current_duration = 0.0;
+cumulative_duration = 0.0;
+last_desired_angle_reached = false;
+time = 0.0;
+
+%initialize lists for storing data
+time_values = [];
+angle_values = [];
+desired_angle_values = [];
+desired_angle_duration_values = [];
+control_signal_values = [];
+
+
+
+
+
+
+
+
+
+XRed(2, 1) = 0;
+YRed(1, 1) = 0; 
 % Accquire video source
 vid = videoinput('winvideo', 1, 'MJPG_1024x576');
 src = getselectedsource(vid);
@@ -8,14 +41,14 @@ vid.FrameGrabInterval = 5;
 
 % start the video aquisition here
 start(vid)
-reversedXRed(2, 1) = 0;
-reversedYRed(1, 1) = 0; 
+% XRed(2, 1) = 0;
+% YRed(1, 1) = 0; 
 % Set a loop that stop after certain frames of aquisition
 while(vid.FramesAcquired<=Inf)
     
     % init the colors
-%     reversedXRed = "";
-%     reversedYRed = "";
+%     XRed = "";
+%     YRed = "";
     
     data = getsnapshot(vid); % Get the snapshot of the current frame
     
@@ -60,32 +93,22 @@ while(vid.FramesAcquired<=Inf)
         plot(bc(1),bc(2), '-m+')
         a=text(bc(1)+15,bc(2), strcat('X: ', num2str(abs( round(bc(1)-size(data,2) ))), '    Y: ', num2str(abs(round(bc(2)-size(data,1))))));
         set(a, 'FontName', 'Arial', 'FontWeight', 'bold', 'FontSize', 12, 'Color', 'yellow');
-        reversedXRed(object, 1) = abs(round(bc(1)-size(data,2)));
-        reversedYRed(object, 1) = abs(round(bc(2)-size(data,1))); 
-%         disp(reversedXRed);
-%         disp(reversedYRed);
-%         class(reversedXRed)
-%         % Update maxXRed, minXRed, maxYRed, minYRed
-%     if reversedXRed > maxXRed && reversedYRed < minYRed
-%         maxXRed = reversedXRed;
-%         minYRed = reversedYRed;
-%     end
-%     
-%     if reversedXRed < minXRed && reversedYRed > maxYRed
-%         minXRed = reversedXRed;
-%         maxYRed = reversedYRed;
-%     end
-%         basePoint = [maxXRed, minYRed];
-%         fingertipPosition = [minXRed, maxYRed];
-% %         disp(basePoint)
-%         disp(fingertipPosition)
-        
+        XRed(object, 1) = abs(round(bc(1)-size(data,2)));
+        YRed(object, 1) = abs(round(bc(2)-size(data,1))); 
+%         disp(XRed);
+%         disp(YRed);
+%         class(XRed)
+
     end
-    disp(reversedXRed);
-    disp(reversedYRed);
-    error = atan((reversedYRed(1,1)-reversedYRed(2,1))/(reversedXRed(1,1)-reversedXRed(2,1)));
+    disp(XRed);
+    disp(YRed);
+    error = atan((YRed(1,1)-YRed(2,1))/(XRed(1,1)-XRed(2,1)));
     error = (error / pi) * 180;
     disp(error)
+    disp(desired_angles{1}(2))
+    %PID controller
+    
+    
     hold off
 end
 
