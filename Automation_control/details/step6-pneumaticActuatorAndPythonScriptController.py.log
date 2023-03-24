@@ -1,0 +1,54 @@
+
+--- NEW SESSION: 02/02/2023 22:40:50 ---
+/goal/goalMO.showColor = 1 1 1 1
+/goal/goalMO.showColor = 1 1 1 1
+/finger.time = 22.74
+
+--- NEW SESSION: 02/02/2023 23:12:05 ---
+/goal/goalMO.showColor = 1 1 1 1
+/goal/goalMO.showColor = 1 1 1 1
+/Mouse/MousePosition.showColor = 1 1 1 1
+/Mouse/MousePosition.position = -67.7693 107.09 202.716
+/Mouse/MousePosition.showColor = 1 1 1 1
+/Mouse/MouseCollisionModel.color = 1 0.498039 0 1
+
+--- NEW SESSION: 02/02/2023 23:56:22 ---
+/goal/goalMO.position = -4.72055 1.13543 3.10608
+/goal/goalMO.showColor = 1 1 1 1
+/goal/goalMO.showIndices = 0
+/goal/goalMO.showObject = 1
+/goal.time = 28.39
+/finger.time = 34.4
+
+--- NEW SESSION: 03/02/2023 00:47:50 ---
+/Mouse/MousePosition.position = -132.486 248.135 -388.096
+/Mouse/MousePosition.showColor = 1 1 1 1
+/goal/goalMO.position = -120 7 7
+/goal/goalMO.showColor = 1 1 1 1
+/goal/goalMO.showColor = 1 1 1 1
+/finger.time = 43.24
+/Mouse/MousePosition.showColor = 1 1 1 1
+
+--- NEW SESSION: 03/02/2023 01:03:11 ---
+/Mouse/MouseInteraction_Vec3d/MappedMousePosition.showColor = 1 1 1 1
+/Mouse/MousePosition.showColor = 1 1 1 1
+/Mouse/MousePosition.showColor = 1 1 1 1
+
+--- NEW SESSION: 03/02/2023 01:09:59 ---
+/Mouse/MousePosition.showColor = 1 1 1 1
+/goal/goalMO.mappingJacobian = 
+/goal/goalMO.showColor = 1 1 1 1
+
+--- NEW SESSION: 03/02/2023 01:15:02 ---
+/goal/goalMO.size = 100
+/goal/goalMO.showColor = 1 1 1 1
+/goal/goalMO.free_position = -80 50 210
+/goal/goalMO.showColor = 1 1 1 1
+/goal/SphereCollisionModel.color = 1 0 1 1
+/goal/SphereCollisionModel.showImpostors = 1
+/goal.time = 82.69
+/finger.time = 82.69
+/goal.time = 82.69
+/finger.time = 82.69
+/goal.time = 82.69
+/finger.time = 82.69
