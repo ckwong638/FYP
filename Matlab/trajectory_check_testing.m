@@ -1,4 +1,4 @@
-%set up the PID parameters
+delete(instrfind({'Port'},{'COM4'}));
 Kp = 0.8;
 Ki = 0.01;
 Kd = 0.0;
@@ -16,7 +16,8 @@ last_desired_angle_reached = false;
 t_start = tic;
 
 %creat a serial object for the Arduino 
-s = serial('COM4', 'BaudRate','9600');
+s = serial('COM4', 'BaudRate', 9600);
+fopen(s);
 
 
 %initialize lists for storing data
@@ -34,7 +35,7 @@ YRed(1, 1) = 0;
 vid = videoinput('winvideo', 1, 'MJPG_1024x576');
 src = getselectedsource(vid);
 
-vid.FramesPerTrigger = Inf;% frames per trigger--> set to inf so that can obtain real time data
+vid.FramesPerTrigger = 30;% frames per trigger--> set to inf so that can obtain real time data
 set(vid, 'ReturnedColorspace', 'rgb') %return the RGB format
 vid.FrameGrabInterval = 5;
 
@@ -43,6 +44,7 @@ start(vid)
 
 % Set a loop that stop after certain frames of aquisition
 while(vid.FramesAcquired<=Inf)
+    
     data = getsnapshot(vid); % Get the snapshot of the current frame
 %     t_elapsed = toc(t_start);
     % Track red objects in real time
@@ -128,14 +130,14 @@ while(vid.FramesAcquired<=Inf)
 
     %PID controller
     output = Kp * error + Ki * intergral_error + Kd * derivative_error;
-%     disp(output)
+    disp(output)
 
     % Update previous finger tip position and velocity
     FingerTipPositionPrev = FingerTipPosition;
     prev_velocity = current_velocity;
-    disp(current_velocity)
-%     disp(t_elapsed)
-%     disp(current_desired_angle)
+%     disp(current_velocity)
+    disp(t_elapsed)
+    disp(current_desired_angle)
 %     disp(current_period)
 %     position_values = [position_values FingerTipPosition]; %append the fingertip position into array
     time_values = [time_values t_elapsed];
@@ -143,12 +145,14 @@ while(vid.FramesAcquired<=Inf)
     desired_angle_values = [desired_angle_values current_desired_angle];
     desired_angle_duration_values = [desired_angle_duration_values current_period];
     control_signal_values = [control_signal_values output];
+    fprintf(s, '%d\n', output);
     
     
     
     
 end
 
+fclose(s);
 
 
 
