@@ -2,19 +2,21 @@
 Kp = 0.8;
 Ki = 0.01;
 Kd = 0.0;
-dt = 0.1;
+dt = 0.01;
 error = 0.0;
 intergral_error = 0.0;
 
 FingerTipPositionPrev = [0; 0];
+prev_velocity = [0; 0];
 last_error = 0.0;
-pre_velocity = zeros(1,3,'uint32');
-desired_angles = {[20, 3.0], [25, 3.0], [20, 3.0]};
+desired_angles = {[60, 3.0], [25, 3.0], [20, 3.0]};
+% desired_angles = {[60, 10.0]};
 desired_angle_index = 1;
 current_duration = 0.0;
 cumulative_duration = 0.0;
 last_desired_angle_reached = false;
 time = 0.0;
+
 
 
 
@@ -82,18 +84,18 @@ while(vid.FramesAcquired<=Inf)
         set(a, 'FontName', 'Arial', 'FontWeight', 'bold', 'FontSize', 12, 'Color', 'yellow');
         XRed(object, 1) = abs(round(bc(1)-size(data,2)));
         YRed(object, 1) = abs(round(bc(2)-size(data,1))); 
-
     end
     %calculate current angle(degree) and current velocity
     FingerTipPosition = [XRed(1,1);YRed(1,1)];
     BasePoint = [XRed(2,1);YRed(2,1)];
     [current_angle, current_velocity] = calculateAngleAndVelocity(FingerTipPosition, BasePoint, FingerTipPositionPrev, dt);
-    disp(current_angle)
-    disp(current_velocity)
+%     disp(current_angle)
+%     disp(current_velocity)
     
-    % Update previous finger tip position
+    % Update previous finger tip position and velocity
     FingerTipPositionPrev = FingerTipPosition;
-    
+    prev_velocity = current_velocity;
+  
 %     pause(dt);
 %     position_values = [position_values FingerTipPosition]; %append the fingertip position into array
     
@@ -103,34 +105,35 @@ while(vid.FramesAcquired<=Inf)
         return;
     end
     
-    %get the current desired angle
+    %get the current desired angle and its duration
     current_desired_angle = desired_angles{desired_angle_index}(1);
-    current_duration = desired_angles{desired_angle_index}(2);
+    current_period = desired_angles{desired_angle_index}(2);
+% 
+    % update the current duration for the current desired angle if it hasn't reached the last desired angle
+    if ~last_desired_angle_reached
+        current_duration = current_duration + dt;
+    end
+    
+    % check if the current desired angle has been reached for the specified duration
+    if current_duration >= current_period
+        % move on to the next desired angle
+        desired_angle_index = desired_angle_index + 1;
+        current_duration = 0.0;
+    end
+    % calculate the error between the current desired angle and the current angle
+    error = current_desired_angle - current_angle;
+%     
+    %calculate the integral error & derivative error
+    intergral_error = intergral_error + error * dt;
+    derivative_error = (current_velocity - prev_velocity) / dt;
 
-%     % get the current desired angle and its duration
-%     [current_desired_angle, current_duration] = desired_angles{desired_angle_index};
-%     
-%     % update the current duration for the current desired angle if it hasn't reached the last desired angle
-%     if ~last_desired_angle_reached
-%         current_duration = current_duration + dt_value;
-%     end
-%     
-%     % check if the current desired angle has been reached for the specified duration
-%     if current_duration >= current_duration
-%         % move on to the next desired angle
-%         desired_angle_index = desired_angle_index + 1;
-%         current_duration = 0.0;
-%     end
-%     % calculate the error between the current desired angle and the current angle
-%     error = current_desired_angle - current_angle;
-%     
-%     %calculate the integral error & derivative error
-%     
-%     
-%     %PID controller
-%     FingerTipPositionPrev = FingerTipPosition; % Store current finger tip position as previous for next iteration
+    %PID controller
+    output = Kp * error + Ki * intergral_error + Kd * derivative_error;
+    disp(output)
 
-    hold off
+    % Update previous finger tip position and velocity
+    FingerTipPositionPrev = FingerTipPosition;
+    prev_velocity = current_velocity;
 end
 
 
@@ -147,13 +150,27 @@ flushdata(vid);
 %   Clear all variables
 clear all
 
-function[current_angle, current_velocity] = calculateAngleAndVelocity(FingerTipPosition, BasePoint, FingerTipPositionPrev, dt)
+function[current_angle, current_velocity] = calculateAngleAndVelocity(FingerTipPosition, BasePoint, ~, ~)
 %calculate finger tip Velocity
-FingerTipVelocity = [0;0];
-if exist('FingerTipPositionPrev', 'var')
-    FingerTipVelocityX = (FingerTipPosition(1) - FingerTipPositionPrev(1)) / dt;
-    FingerTipVelocityY = (FingerTipPosition(2) - FingerTipPositionPrev(2)) / dt;
-    FingerTipVelocity = [-FingerTipVelocityX; FingerTipVelocityY];    
+persistent prev_time prev_pos
+
+%get the current time using datatime function
+curr_time = datetime('now');
+if isempty(prev_pos) || isempty(prev_time)
+    prev_pos = [FingerTipPosition(1); FingerTipPosition(2)];
+    prev_time = curr_time;
+    FingerTipVelocity = [0;0];
+else
+    curr_pos = [FingerTipPosition(1); FingerTipPosition(2)];
+    
+    dt = seconds(curr_time - prev_time);
+    
+    curr_pos(1) = curr_pos(1)*-1;
+    displacement = curr_pos - prev_pos;
+    FingerTipVelocity = displacement / dt; %pixels per second
+    
+    prev_pos = curr_pos;
+    prev_time = curr_time;
 end
 
 %calculate finger tip angle
@@ -163,24 +180,4 @@ current_angle = (current_angle_pi / pi) * 180;
 current_velocity = FingerTipVelocity;
 end
 
-% function[current_velocity] = calculateVelocity()
-% FingerTipPosition = [XRed(1,1);YRed(1,1)];
-% FingerTipVelocity = [0;0]; % Initialize velocity as zero
-% FingerTipPrev = FingerTipPosition; % Store previous finger tip position
-%     
-% % Measure time elapsed since last iteration
-% tic;
-% elapsedTime = toc;
-% 
-% % Calculate velocity if current and previous positions are available
-% if exist('FingerTipPositionPrev', 'var')
-%     FingerTipVelocityX = (FingerTipPosition(1) - FingerTipPositionPrev(1)) / toc;
-%     FingerTipVelocityY = (FingerTipPosition(2) - FingerTipPositionPrev(2)) / toc;
-%     FingerTipVelocity = [-FingerTipVelocityX;FingerTipVelocityY];
-%     current_velocity = FingerTipVelocity;
-% end
-% 
-% FingerTipPositionPrev = FingerTipPosition; % Store current finger tip position as previous for next iteration
-% 
-% end
 
