@@ -150,22 +150,19 @@ while(vid.FramesAcquired<=Inf)
         desired_angle_duration_values = [desired_angle_duration_values current_period];
         control_signal_values = [control_signal_values output];
         
-        %define the voltage range of the smc itv
-        Vmin = 0;
-        Vmax = 5;
+        %define the voltage range of the smc itv 
+        % Voltage range
+        Vmin = 1.85;
+        Vmax = 4.8;
         
-        %Define the min and max output values of pid controller
-        PIDmin = -50;
-        PIDmax = 50;
         
-        PIDout = output;
+        % Map the constrained PID output to the voltage range
+        voltage = pidToVoltage(output, Vmin, Vmax, PIDmin, PIDmax);
+        fprintf('voltage is %d\n', voltage);
         
-        Vout_mapped = mapminmax(PIDout, Vmin, Vmax);
+     
         
-        Vout = Vmin + ((Vmax - Vmin) * (Vout_mapped - PIDmin)) / (PIDmax - PIDmin);
-%         disp(Vout)
-        
-        fprintf(s, '%d\n', Vout);
+        fprintf(s, '%d\n', voltage);
     end
     
     %update the figure
@@ -236,5 +233,11 @@ current_angle = (current_angle_pi / pi) * 180;
 
 current_velocity = norm(FingerTipVelocity);
 end
+function voltage = pidToVoltage(pidOutput, Vmin, Vmax, PIDmin, PIDmax)
+% Normalize PID output to [0, 1]
+normalizedOutput = (pidOutput - PIDmin) / (PIDmax - PIDmin);
 
+% Map normalized output to voltage range [Vmin, Vmax]
+voltage = normalizedOutput * (Vmax - Vmin) + Vmin;
+end
 

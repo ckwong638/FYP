@@ -1,5 +1,5 @@
 delete(instrfind({'Port'},{'COM4'}));
-Kp = 0.0025;
+Kp = 0.000025;
 Ki = 0.0;
 Kd = 0.0;
 dt = 0.01;
@@ -135,11 +135,11 @@ while(vid.FramesAcquired<=Inf)
         
         % Map the constrained PID output to the voltage range
         voltage = pidToVoltage(output, Vmin, Vmax, PIDmin, PIDmax);
-%         fprintf('voltage is %d\n', voltage);
+        fprintf('voltage is %d\n', voltage);
         
      
         
-%         fprintf(s, '%d\n', Vout);
+        fprintf(s, '%d\n', voltage);
         
         % This is a loop to bound the red objects in a rectangular box.
         angle_values = [angle_values current_angle];
